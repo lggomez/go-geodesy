@@ -40,7 +40,31 @@ func TestHaversine(t *testing.T) {
 				p1: geodesy.Point{-37.57037203, 144.25295244},
 				p2: geodesy.Point{-37.39101561, 143.55353839},
 			},
-			expectedDistance: 64858.3251025962,
+			expectedDistance: 64_858.3251025962,
+		},
+		{
+			name: "OK/NW-SE_over_10000km",
+			args: args{
+				p1:               geodesy.Point{43.916325, -119.352141},
+				p2:               geodesy.Point{-32.239202, 150.621015},
+			},
+			expectedDistance: 1.2424241373877214e+07,
+		},
+		{
+			name: "OK/antipode",
+			args: args{
+				p1:               geodesy.Point{40.698470, -73.951442},
+				p2:               geodesy.Point{-40.698470, 106.048558},
+			},
+			expectedDistance: 2.0015114352233686e+07,
+		},
+		{
+			name: "OK/antipode2",
+			args: args{
+				p1:               geodesy.Point{40.698470, -73.951442},
+				p2:               geodesy.Point{40.698470, -73.951442}.Antipode(),
+			},
+			expectedDistance: 2.0015114352233686e+07,
 		},
 	}
 	for _, tt := range tests {

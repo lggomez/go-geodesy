@@ -9,11 +9,13 @@ import (
 
 const (
 	defaultAccuracy float64 = 1e-12 // approximates to 0.06 mm
-	maxIterations   int     = 100
+	maxIterations   int     = 50
+	fullAngleRad = 2 * math.Pi
+	radConversionFactor = 180/math.Pi
 )
 
 /*
-	VicentyInverse calculates the ellipsoidal distance and azimuth between 2 points using the
+	VicentyInverse calculates the ellipsoidal distance in meters and azimuth in degrees between 2 points using the
 inverse Vicenty formulae and the WGS-84 ellipsoid constants. The following notations are used:
 	a 	length of semi-major axis of the ellipsoid (radius at equator)
 	ƒ 	flattening of the ellipsoid
@@ -33,6 +35,11 @@ inverse Vicenty formulae and the WGS-84 ellipsoid constants. The following notat
 func VicentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth bool) (float64, float64, float64) {
 	if p1.Equals(p2) {
 		return 0, 0, 0
+	}
+
+	if p1.IsAntipode(p2) {
+		// Antipodes are non-convergent
+		return math.NaN(), math.NaN(), math.NaN()
 	}
 
 	ε := defaultAccuracy
@@ -59,15 +66,15 @@ func VicentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth boo
 	sinλ, cosλ := float64(0), float64(0)
 	cos2σₘ := float64(0)
 	σ := float64(0)
+	sinλ, cosλ = math.Sincos(λ)
 
 	// Perform iterative evaluation of λ until it either converges to ε or reaches the maximum amount of iterations
 	for i := 0; math.Abs(λ-λ_prev) > ε; i++ {
 		// Test for divergence and nearly antipodal points
-		if i > maxIterations || (math.Abs(λ) > math.Pi) {
+		if i > maxIterations {
 			return math.NaN(), math.NaN(), math.NaN()
 		}
 
-		sinλ, cosλ = math.Sincos(λ)
 		sinσ = math.Sqrt((cosu2*sinλ)*(cosu2*sinλ) +
 			((cosu1*sinu2)-(sinu1*cosu2*cosλ))*((cosu1*sinu2)-(sinu1*cosu2*cosλ)))
 		if sinσ == 0 {
@@ -91,6 +98,7 @@ func VicentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth boo
 
 		λ_prev = λ
 		λ = L + (1-C)*f*sinα*(σ+C*sinσ*(cos2σₘ+C*cosσ*(-1+2*cos2σₘ*cos2σₘ)))
+		sinλ, cosλ = math.Sincos(λ)
 	}
 
 	// Setup return variables
@@ -111,9 +119,23 @@ func VicentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth boo
 	d = b * A * (σ - Δσ) // ellipsoidal distance in meters
 
 	if calculateAzimuth {
-		α1 = math.Atan2(cosu2*sinλ, (cosu1*sinu2)-(sinu1*cosu2*cosλ))
-		α2 = math.Atan2(cosu2*sinλ, -(sinu1*cosu2)+(cosu2*sinu2*cosλ))
+		numα1 := cosu2*sinλ
+		denomα1 := (cosu1*sinu2)-(sinu1*cosu2*cosλ)
+		α1 = quadrantRadToDegree(math.Atan2(numα1, denomα1))
+
+		numα2 := cosu1*sinλ
+		denomα2 := (-sinu1*cosu2)+(cosu1*sinu2*cosλ)
+		α2 = quadrantRadToDegree(math.Atan2(numα2, denomα2))
+		α2 = math.Mod(α2 + 180, 360) // Normalize degree to north meridian as origin vector
 	}
 
 	return d, α1, α2
+}
+
+func quadrantRadToDegree(rad float64) float64 {
+	if rad < 0 {
+		return (rad + fullAngleRad) * radConversionFactor
+	}
+
+	return rad * radConversionFactor
 }
