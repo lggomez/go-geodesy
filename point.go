@@ -25,7 +25,9 @@ func (p Point) Antipode() Point {
 }
 
 func (p Point) IsAntipode(p2 Point) bool {
-	return (p[0] == -p2[0]) && (p[1] == (180 - math.Abs(p2[1])))
+	// Shorthand check to avoid Equals() calls between p and p2
+	return ((p[0] == -p2[0]) && (p[1] == (180 - math.Abs(p2[1])))) ||
+		(p2[0] == -p[0]) && (p2[1] == (180 - math.Abs(p[1])))
 }
 
 func (p Point) Equals(p2 Point) bool {
