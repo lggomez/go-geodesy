@@ -10,6 +10,7 @@ import (
 const (
 	defaultAccuracy float64 = 1e-12 // approximates to 0.06 mm
 	maxIterations   int     = 50
+
 	fullAngleRad = 2 * math.Pi
 	radConversionFactor = 180/math.Pi
 )
