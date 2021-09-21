@@ -43,7 +43,7 @@ const (
 	// WGS84_POLAR_CURVATURE_RADIUS Polar radius of curvature = (a^2)/b; defined in meters (m)
 	WGS84_POLAR_CURVATURE_RADIUS = 6_399_593.625758493
 	// WGS84_MERIDIAN_CURVATURE_EQUATORIAL_RADIUS Equatorial radius of curvature for a meridian = (b^2)/a; defined in meters (m)
-	WGS84_MERIDIAN_CURVATURE_EQUATORIAL_RADIUS = 6335439.327292821
+	WGS84_MERIDIAN_CURVATURE_EQUATORIAL_RADIUS = 6_335_439.327292821
 
 	// WGS84_MERIDIAN_QUADRANT Meridian quadrant (meridian quarter); defined in meters (m)
 	// See https://en.wikipedia.org/wiki/Meridian_arc#Quarter_meridian

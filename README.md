@@ -95,8 +95,8 @@ LonRadians returns point p's longitude in radians
 ```go
 func Haversine(p1, p2 geodesy.Point) float64
 ```
-Haversine calculates the ellipsoidal distance in meters between 2 points using
-the Haversine formula
+Haversine calculates the ellipsoidal distance in meters between 2 points 
+using the Haversine formula and the WGS-84 ellipsoid constants
 
 #### func  VicentyInverse
 
@@ -104,9 +104,10 @@ the Haversine formula
 func VicentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth bool) (float64, float64, float64)
 ```
 
-VicentyInverse calculates the ellipsoidal distance in meters and azimuth in degrees between 2 points using the inverse Vicenty formulae and the WGS-84 ellipsoid constants. 
+VicentyInverse calculates the ellipsoidal distance in meters and azimuth in degrees between 2 points using the inverse Vicenty formulae and the WGS-84 ellipsoid constants. As it is an iterative operation it will converge to the defined accuracy, if accuracy < 0 it will use the default accuracy of 1e-12 (approximately 0.06 mm). If
+calculateAzimuth is set to true, it will compute the forward and reverse azimuths (otherwise, these default to math.NaN())
 
-The following notations are used:
+The following notations are used in the implementation:
 
     * a 	length of semi-major axis of the ellipsoid (radius at equator)
     * ƒ 	flattening of the ellipsoid
@@ -231,7 +232,7 @@ const (
 	// WGS84_POLAR_CURVATURE_RADIUS Polar radius of curvature = (a^2)/b; defined in meters (m)
 	WGS84_POLAR_CURVATURE_RADIUS = 6_399_593.625758493
 	// WGS84_MERIDIAN_CURVATURE_EQUATORIAL_RADIUS Equatorial radius of curvature for a meridian = (b^2)/a; defined in meters (m)
-	WGS84_MERIDIAN_CURVATURE_EQUATORIAL_RADIUS = 6335439.327292821
+	WGS84_MERIDIAN_CURVATURE_EQUATORIAL_RADIUS = 6_335_439.327292821
 
 	// WGS84_MERIDIAN_QUADRANT Meridian quadrant (meridian quarter); defined in meters (m)
 	// See https://en.wikipedia.org/wiki/Meridian_arc#Quarter_meridian

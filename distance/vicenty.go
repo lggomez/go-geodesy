@@ -17,7 +17,11 @@ const (
 
 /*
 	VicentyInverse calculates the ellipsoidal distance in meters and azimuth in degrees between 2 points using the
-inverse Vicenty formulae and the WGS-84 ellipsoid constants. The following notations are used:
+inverse Vicenty formulae and the WGS-84 ellipsoid constants. As it is an iterative operation it will converge to
+the defined accuracy, if accuracy < 0 it will use the default accuracy of 1e-12 (approximately 0.06 mm). If
+calculateAzimuth is set to true, it will compute the forward and reverse azimuths (otherwise, these default to math.NaN())
+
+The following notations are used:
 	a 	length of semi-major axis of the ellipsoid (radius at equator)
 	ƒ 	flattening of the ellipsoid
 	b = (1 − ƒ) a 	length of semi-minor axis of the ellipsoid (radius at the poles)
@@ -51,13 +55,13 @@ func VicentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth boo
 	// Initial conditions setup
 	a := ellipsoids.WGS84_SEMI_MAJOR_AXIS
 	b := ellipsoids.WGS84_SEMI_MINOR_AXIS
-	f := ellipsoids.WGS84_FLATTENING
-	u1 := math.Atan((1 - f) * math.Tan(p1.LatRadians())) // Reduced latitude for p1
-	u2 := math.Atan((1 - f) * math.Tan(p2.LatRadians())) // Reduced latitude for p2
+	ƒ := ellipsoids.WGS84_FLATTENING
+	u1 := math.Atan((1 - ƒ) * math.Tan(p1.LatRadians())) // Reduced latitude for p1
+	u2 := math.Atan((1 - ƒ) * math.Tan(p2.LatRadians())) // Reduced latitude for p2
 	L := p2.LonRadians() - p1.LonRadians()               // Difference in longitude
 	λ := L                                               // Difference in longitude of the points on the auxiliary sphere
 	λ_prev := float64(0)
-	f16Frac := f / 16
+	f16Frac := ƒ / 16
 	sinu1, cosu1 := math.Sincos(u1)
 	sinu2, cosu2 := math.Sincos(u2)
 
@@ -94,11 +98,11 @@ func VicentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth boo
 		C := float64(0)
 		// Distances through the equator yield C = 0, so calculate if points do not fall on it
 		if (p1.Lon() != 0) && (p2.Lon() != 0) {
-			C = f16Frac * cos2α * (4 + f*(4-3*cos2α))
+			C = f16Frac * cos2α * (4 + ƒ*(4-3*cos2α))
 		}
 
 		λ_prev = λ
-		λ = L + (1-C)*f*sinα*(σ+C*sinσ*(cos2σₘ+C*cosσ*(-1+2*cos2σₘ*cos2σₘ)))
+		λ = L + (1-C)*ƒ*sinα*(σ+C*sinσ*(cos2σₘ+C*cosσ*(-1+2*cos2σₘ*cos2σₘ)))
 		sinλ, cosλ = math.Sincos(λ)
 	}
 

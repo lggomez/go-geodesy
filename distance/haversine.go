@@ -7,7 +7,8 @@ import (
 	"github.com/lggomez/go-geodesy/ellipsoids"
 )
 
-// Haversine calculates the ellipsoidal distance in meters between 2 points using the Haversine formula
+// Haversine calculates the ellipsoidal distance in meters between 2 points
+// using the Haversine formula and the WGS-84 ellipsoid constants
 func Haversine(p1, p2 geodesy.Point) float64 {
 	if p1.Equals(p2) {
 		return 0
