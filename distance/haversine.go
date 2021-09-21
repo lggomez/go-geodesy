@@ -14,14 +14,24 @@ func Haversine(p1, p2 geodesy.Point) float64 {
 		return 0
 	}
 
-	latRadians2 := p2.LatRadians()
-	latRadians1 := p1.LatRadians()
-	latDiff := math.Sin((latRadians2 - latRadians1) / 2)
-	lonDiff := math.Sin((p2.LonRadians() - p1.LonRadians()) / 2)
+	φ1 := p1.LatRadians()
+	φ2 := p2.LatRadians()
 
-	root := math.Sqrt(latDiff*latDiff + lonDiff*lonDiff*math.Cos(latRadians1)*math.Cos(latRadians2))
+	λ1 := p1.LonRadians()
+	λ2 := p2.LonRadians()
 
-	d := 2 * ellipsoids.WGS84_MEAN_RADIUS * math.Asin(root)
+	latHalfVersine := math.Sin((φ2 - φ1) / 2)
+	lonHalfVersine := math.Sin((λ2 - λ1) / 2)
 
-	return d
+	h := math.Sqrt((latHalfVersine * latHalfVersine) +
+		(lonHalfVersine * lonHalfVersine) *
+			math.Cos(φ1)*math.Cos(φ2))
+
+	if h > 1 {
+		// d is only real for 0<=h<=1
+		return math.NaN()
+	}
+
+	// Main inverse haversine formula
+	return 2 * ellipsoids.WGS84_MEAN_RADIUS * math.Asin(h)
 }

@@ -9,6 +9,18 @@ import (
 )
 
 func TestHaversine(t *testing.T) {
+	antipodeOriginNW := geodesy.Point{42.358312, -95.310466}
+	antipodeNW := antipodeOriginNW.Antipode()
+
+	antipodeOriginNE := geodesy.Point{62.379312, 99.612962}
+	antipodeNE := antipodeOriginNE.Antipode()
+
+	antipodeOriginSW := geodesy.Point{-54.839747, 66.500319}
+	antipodeSW := antipodeOriginSW.Antipode()
+
+	antipodeOriginSE := geodesy.Point{-46.272337, 169.398118}
+	antipodeSE := antipodeOriginSE.Antipode()
+
 	type args struct {
 		p1 geodesy.Point
 		p2 geodesy.Point
@@ -45,24 +57,64 @@ func TestHaversine(t *testing.T) {
 		{
 			name: "OK/NW-SE_over_10000km",
 			args: args{
-				p1:               geodesy.Point{43.916325, -119.352141},
-				p2:               geodesy.Point{-32.239202, 150.621015},
+				p1: geodesy.Point{43.916325, -119.352141},
+				p2: geodesy.Point{-32.239202, 150.621015},
 			},
 			expectedDistance: 1.2424241373877214e+07,
 		},
 		{
+			name: "OK/equator",
+			args: args{
+				p1: geodesy.Point{0, -71.313379},
+				p2: geodesy.Point{0, -73.15691},
+			},
+			expectedDistance: 204991.57653826568,
+		},
+		{
+			name: "OK/antipodeNW_aprox",
+			args: args{
+				p1: antipodeOriginNW,
+				p2: geodesy.Point{antipodeNW.Lat() + 0.5, antipodeNW.Lon() + 0.5},
+			},
+			expectedDistance: 1.9945887707923543e+07,
+		},
+		{
+			name: "OK/antipodeNE_aprox",
+			args: args{
+				p1: antipodeOriginNE,
+				p2: geodesy.Point{antipodeNE.Lat() + 0.1, antipodeNE.Lon() + 0.1},
+			},
+			expectedDistance: 1.39540965209409e+07,
+		},
+		{
+			name: "OK/antipodeSE_aprox",
+			args: args{
+				p1: antipodeOriginSE,
+				p2: geodesy.Point{antipodeSE.Lat() + 0.1, antipodeSE.Lon() + 0.1},
+			},
+			expectedDistance: 1.8384089351069085e+07,
+		},
+		{
+			name: "OK/antipodeSW_aprox",
+			args: args{
+				p1: antipodeOriginSW,
+				p2: geodesy.Point{antipodeSW.Lat() + 0.1, antipodeSW.Lon() + 0.1},
+			},
+			expectedDistance: 1.2938700886812994e+07,
+		},
+		{
 			name: "OK/antipode",
 			args: args{
-				p1:               geodesy.Point{40.698470, -73.951442},
-				p2:               geodesy.Point{-40.698470, 106.048558},
+				p1: geodesy.Point{40.698470, -73.951442},
+				p2: geodesy.Point{-40.698470, 106.048558},
 			},
 			expectedDistance: 2.0015114352233686e+07,
 		},
 		{
 			name: "OK/antipode2",
 			args: args{
-				p1:               geodesy.Point{40.698470, -73.951442},
-				p2:               geodesy.Point{40.698470, -73.951442}.Antipode(),
+				p1: geodesy.Point{40.698470, -73.951442},
+				p2: geodesy.Point{40.698470, -73.951442}.Antipode(),
 			},
 			expectedDistance: 2.0015114352233686e+07,
 		},
