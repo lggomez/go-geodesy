@@ -16,8 +16,8 @@ const (
 )
 
 /*
-	VicentyInverse calculates the ellipsoidal distance in meters and azimuth in degrees between 2 points using the
-inverse Vicenty formulae and the WGS-84 ellipsoid constants. As it is an iterative operation it will converge to
+	VincentyInverse calculates the ellipsoidal distance in meters and azimuth in degrees between 2 points using the
+inverse Vincenty formulae and the WGS-84 ellipsoid constants. As it is an iterative operation it will converge to
 the defined accuracy, if accuracy < 0 it will use the default accuracy of 1e-12 (approximately 0.06 mm). If
 calculateAzimuth is set to true, it will compute the forward and reverse azimuths (otherwise, these default to math.NaN())
 
@@ -37,7 +37,7 @@ The following notations are used:
 	σ1 	angular separation between the point and the equator;
 	σm 	angular separation between the midpoint of the line and the equator;
 */
-func VicentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth bool) (float64, float64, float64) {
+func VincentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth bool) (float64, float64, float64) {
 	if p1.Equals(p2) {
 		return 0, 0, 0
 	}
@@ -75,7 +75,7 @@ func VicentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth boo
 
 	// Perform iterative evaluation of λ until it either converges to ε or reaches the maximum amount of iterations
 	for i := 0; math.Abs(λ-λ_prev) > ε; i++ {
-		// Test for divergence and nearly antipodal points
+		// Test for divergence on max iterations
 		if i > maxIterations {
 			return math.NaN(), math.NaN(), math.NaN()
 		}
@@ -92,17 +92,20 @@ func VicentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth boo
 		σ = math.Atan2(sinσ, cosσ) // Angular separation between points
 
 		sinα := (cosu1 * cosu2 * sinλ) / sinσ
-		cos2α = 1 - (sinα * sinα)
-		cos2σₘ = cosσ - ((2 * sinu1 * sinu2) / cos2α)
 
+		cos2σₘ = float64(0)
 		C := float64(0)
-		// Distances through the equator yield C = 0, so calculate if points do not fall on it
-		if (p1.Lon() != 0) && (p2.Lon() != 0) {
+		// Distances through the equator yield C = 0 and cos2σₘ is not used,
+		// so calculate if points do not fall on it
+		if (p1.Lat() != 0) && (p2.Lat() != 0) {
+			cos2α = 1 - (sinα * sinα)
+			cos2σₘ = cosσ - ((2 * sinu1 * sinu2) / cos2α)
 			C = f16Frac * cos2α * (4 + ƒ*(4-3*cos2α))
 		}
 
 		λ_prev = λ
 		λ = L + (1-C)*ƒ*sinα*(σ+C*sinσ*(cos2σₘ+C*cosσ*(-1+2*cos2σₘ*cos2σₘ)))
+
 		sinλ, cosλ = math.Sincos(λ)
 	}
 

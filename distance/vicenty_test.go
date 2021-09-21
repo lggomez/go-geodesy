@@ -9,9 +9,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestVicentyInverse(t *testing.T) {
-	antipodeOrigin := geodesy.Point{40.698470, -73.951442}
-	antipode := antipodeOrigin.Antipode()
+func TestVincentyInverse(t *testing.T) {
+	antipodeOriginNW := geodesy.Point{42.358312, -95.310466}
+	antipodeNW := antipodeOriginNW.Antipode()
+
+	antipodeOriginNE := geodesy.Point{62.379312, 99.612962}
+	antipodeNE := antipodeOriginNE.Antipode()
+
+	antipodeOriginSW := geodesy.Point{-54.839747, 66.500319}
+	antipodeSW := antipodeOriginSW.Antipode()
+
+	antipodeOriginSE := geodesy.Point{-46.272337, 169.398118}
+	antipodeSE := antipodeOriginSE.Antipode()
 
 	type args struct {
 		p1               geodesy.Point
@@ -123,22 +132,70 @@ func TestVicentyInverse(t *testing.T) {
 			expectedAzimuth2: 50.994718337013865,
 		},
 		{
-			name: "OK/antipode_aprox",
+			name: "OK/equator",
 			args: args{
-				p1:               antipodeOrigin,
-				p2:               geodesy.Point{math.Ceil(antipode.Lat()), math.Ceil(antipode.Lon())},
+				p1:               geodesy.Point{0, -71.313379},
+				p2:               geodesy.Point{0, -73.15691},
 				accuracy:         -1,
 				calculateAzimuth: true,
 			},
-			expectedDistance: 1.990042228821669e+07,
-			expectedAzimuth1: 323.2114038644566,
-			expectedAzimuth2: 36.35011968130334,
+			expectedDistance: 205220.9321815281,
+			expectedAzimuth1: 270,
+			expectedAzimuth2: 90,
+		},
+		{
+			name: "OK/antipodeNW_aprox",
+			args: args{
+				p1:               antipodeOriginNW, // this coordinate seems especially hard to converge
+				p2:               geodesy.Point{antipodeNW.Lat() + 0.5, antipodeNW.Lon() + 0.5},
+				accuracy:         -1,
+				calculateAzimuth: true,
+			},
+			expectedDistance: 1.9939429136002023e+07,
+			expectedAzimuth1: 335.01113953197097,
+			expectedAzimuth2: 24.780010599686307,
+		},
+		{
+			name: "OK/antipodeNE_aprox",
+			args: args{
+				p1:               antipodeOriginNE,
+				p2:               geodesy.Point{antipodeNE.Lat() + 0.1, antipodeNE.Lon() + 0.1},
+				accuracy:         -1,
+				calculateAzimuth: true,
+			},
+			expectedDistance: 1.392052684154077e+07,
+			expectedAzimuth1: 190.81695568835386,
+			expectedAzimuth2: 10.780632958360911,
+		},
+		{
+			name: "OK/antipodeSE_aprox",
+			args: args{
+				p1:               antipodeOriginSE,
+				p2:               geodesy.Point{antipodeSE.Lat() + 0.1, antipodeSE.Lon() + 0.1},
+				accuracy:         -1,
+				calculateAzimuth: true,
+			},
+			expectedDistance: 1.8383995064596053e+07,
+			expectedAzimuth1: 277.98586894108723,
+			expectedAzimuth2: 97.20292896924542,
+		},
+		{
+			name: "OK/antipodeSW_aprox",
+			args: args{
+				p1:               antipodeOriginSW,
+				p2:               geodesy.Point{antipodeSW.Lat() + 0.1, antipodeSW.Lon() + 0.1},
+				accuracy:         -1,
+				calculateAzimuth: true,
+			},
+			expectedDistance: 1.2906415827849764e+07,
+			expectedAzimuth1: 28.09660240174846,
+			expectedAzimuth2: 208.17248801650823,
 		},
 		{
 			name: "FAIL/antipode",
 			args: args{
-				p1:               antipodeOrigin,
-				p2:               antipode,
+				p1:               antipodeOriginNW,
+				p2:               antipodeNW,
 				accuracy:         -1,
 				calculateAzimuth: true,
 			},
@@ -150,7 +207,7 @@ func TestVicentyInverse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d, az1, az2 := distance.VicentyInverse(tt.args.p1, tt.args.p2, tt.args.accuracy, tt.args.calculateAzimuth)
+			d, az1, az2 := distance.VincentyInverse(tt.args.p1, tt.args.p2, tt.args.accuracy, tt.args.calculateAzimuth)
 			if math.IsNaN(tt.expectedDistance) {
 				assert.True(t, math.IsNaN(d))
 			} else {

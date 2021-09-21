@@ -19,7 +19,7 @@ go-geodesy is a package of geodesy-related utilities made in golang, including e
 			- [func (Point) LonRadians](#func-point-lonradians)
 		- [Calculating distances](#calculating-distances)
 			- [func  Haversine](#func--haversine)
-			- [func  VicentyInverse](#func--vicentyinverse)
+			- [func  VincentyInverse](#func--Vincentyinverse)
 		- [Ellipsoids](#ellipsoids)
 			- [GRS-80](#grs-80)
 			- [WGS-84](#wgs-84)
@@ -98,13 +98,13 @@ func Haversine(p1, p2 geodesy.Point) float64
 Haversine calculates the ellipsoidal distance in meters between 2 points 
 using the Haversine formula and the WGS-84 ellipsoid constants
 
-#### func  VicentyInverse
+#### func  VincentyInverse
 
 ```go
-func VicentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth bool) (float64, float64, float64)
+func VincentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth bool) (float64, float64, float64)
 ```
 
-VicentyInverse calculates the ellipsoidal distance in meters and azimuth in degrees between 2 points using the inverse Vicenty formulae and the WGS-84 ellipsoid constants. As it is an iterative operation it will converge to the defined accuracy, if accuracy < 0 it will use the default accuracy of 1e-12 (approximately 0.06 mm). If
+VincentyInverse calculates the ellipsoidal distance in meters and azimuth in degrees between 2 points using the inverse Vincenty formulae and the WGS-84 ellipsoid constants. As it is an iterative operation it will converge to the defined accuracy, if accuracy < 0 it will use the default accuracy of 1e-12 (approximately 0.06 mm). If
 calculateAzimuth is set to true, it will compute the forward and reverse azimuths (otherwise, these default to math.NaN())
 
 The following notations are used in the implementation:
