@@ -19,7 +19,8 @@ const (
 	VincentyInverse calculates the ellipsoidal distance in meters and azimuth in degrees between 2 points using the
 inverse Vincenty formulae and the WGS-84 ellipsoid constants. As it is an iterative operation it will converge to
 the defined accuracy, if accuracy < 0 it will use the default accuracy of 1e-12 (approximately 0.06 mm). If
-calculateAzimuth is set to true, it will compute the forward and reverse azimuths (otherwise, these default to math.NaN())
+calculateAzimuth is set to true, it will compute the forward and reverse azimuths (otherwise, these default to math.NaN()).
+If any of the points does not constitute a valid geographic coordinate, the returned distance will be math.NaN().
 
 The following notations are used:
 	a 	length of semi-major axis of the ellipsoid (radius at equator)
@@ -38,11 +39,15 @@ The following notations are used:
 	σm 	angular separation between the midpoint of the line and the equator;
 */
 func VincentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth bool) (float64, float64, float64) {
+	if !p1.Valid() || !p2.Valid() {
+		return stdMath.NaN(), stdMath.NaN(), stdMath.NaN()
+	}
+
 	if p1.Equals(p2) {
 		return 0, 0, 0
 	}
 
-	if p1.IsAntipode(p2) {
+	if p1.IsAntipodeOf(p2) {
 		// Antipodes are non-convergent
 		return stdMath.NaN(), stdMath.NaN(), stdMath.NaN()
 	}

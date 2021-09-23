@@ -50,12 +50,12 @@ func (p Point) Equals(p2 Point) bool
 ```
 Equals returns whether p is equal in latitude and longitude to p2
 
-#### func (Point) IsAntipode
+#### func (Point) IsAntipodeOf
 
 ```go
-func (p Point) IsAntipode(p2 Point) bool
+func (p Point) IsAntipodeOf(p2 Point) bool
 ```
-IsAntipode returns whether p is the exact antipode of p2 or not
+IsAntipodeOf returns whether p is the exact antipode of p2 or not
 
 #### func (Point) Lat
 
@@ -96,7 +96,9 @@ LonRadians returns point p's longitude in radians
 func Haversine(p1, p2 geodesy.Point) float64
 ```
 Haversine calculates the ellipsoidal distance in meters between 2 points 
-using the Haversine formula and the WGS-84 ellipsoid constants
+using the Haversine formula and the WGS-84 ellipsoid constants.
+If any of the points does not constitute a valid geographic coordinate, 
+the returned distance will be math.NaN().
 
 #### func  VincentyInverse
 
@@ -106,6 +108,7 @@ func VincentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth bo
 
 VincentyInverse calculates the ellipsoidal distance in meters and azimuth in degrees between 2 points using the inverse Vincenty formulae and the WGS-84 ellipsoid constants. As it is an iterative operation it will converge to the defined accuracy, if accuracy < 0 it will use the default accuracy of 1e-12 (approximately 0.06 mm). If
 calculateAzimuth is set to true, it will compute the forward and reverse azimuths (otherwise, these default to math.NaN())
+If any of the points does not constitute a valid geographic coordinate, the returned distance will be math.NaN().
 
 The following notations are used in the implementation:
 

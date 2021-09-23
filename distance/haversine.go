@@ -8,8 +8,14 @@ import (
 )
 
 // Haversine calculates the ellipsoidal distance in meters between 2 points
-// using the Haversine formula and the WGS-84 ellipsoid constants
+// using the Haversine formula and the WGS-84 ellipsoid constants.
+// If any of the points does not constitute a valid geographic coordinate, the
+// returned distance will be math.NaN()
 func Haversine(p1, p2 geodesy.Point) float64 {
+	if !p1.Valid() || !p2.Valid() {
+		return math.NaN()
+	}
+
 	if p1.Equals(p2) {
 		return 0
 	}
