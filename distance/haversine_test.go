@@ -1,6 +1,7 @@
 package distance_test
 
 import (
+	"math"
 	"testing"
 
 	"github.com/lggomez/go-geodesy"
@@ -118,11 +119,31 @@ func TestHaversine(t *testing.T) {
 			},
 			expectedDistance: 2.0015114352233686e+07,
 		},
+		{
+			name: "FAIL/invalid_p1",
+			args: args{
+				p1:               geodesy.Point{geodesy.LatUpperBound+1, -57.534954},
+				p2:               geodesy.Point{-34.579340, -57.534954},
+			},
+			expectedDistance: math.NaN(),
+		},
+		{
+			name: "FAIL/invalid_p2",
+			args: args{
+				p1:               geodesy.Point{-34.579340, -57.534954},
+				p2:               geodesy.Point{geodesy.LatUpperBound+1, -57.534954},
+			},
+			expectedDistance: math.NaN(),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			d := distance.Haversine(tt.args.p1, tt.args.p2)
-			assert.Equal(t, tt.expectedDistance, d)
+			if math.IsNaN(tt.expectedDistance) {
+				assert.True(t, math.IsNaN(d), "got %f", d)
+			} else {
+				assert.EqualValues(t, tt.expectedDistance, d)
+			}
 		})
 	}
 }

@@ -36,6 +36,17 @@ type Point [2]float64
 
 Point represents a latitude-longitude pair in decimal degrees
 
+Constants
+
+```go
+const (
+	LatLowerBound = float64(-90)
+	LatUpperBound = float64(90)
+	LonLowerBound = float64(-180)
+	LonUpperBound = float64(180)
+)
+```
+
 #### func (Point) Antipode
 
 ```go
@@ -106,8 +117,10 @@ the returned distance will be math.NaN().
 func VincentyInverse(p1, p2 geodesy.Point, accuracy float64, calculateAzimuth bool) (float64, float64, float64)
 ```
 
-VincentyInverse calculates the ellipsoidal distance in meters and azimuth in degrees between 2 points using the inverse Vincenty formulae and the WGS-84 ellipsoid constants. As it is an iterative operation it will converge to the defined accuracy, if accuracy < 0 it will use the default accuracy of 1e-12 (approximately 0.06 mm). If
-calculateAzimuth is set to true, it will compute the forward and reverse azimuths (otherwise, these default to math.NaN())
+VincentyInverse calculates the ellipsoidal distance in meters and azimuth in degrees between 2 points using the
+inverse Vincenty formulae and the WGS-84 ellipsoid constants. As it is an iterative operation it will converge to
+the defined accuracy, if accuracy < 0 it will use the default accuracy of 1e-12 (approximately 0.06 mm, magnitude should be no bigger than 1e-6).
+If calculateAzimuth is set to true, it will compute the forward and reverse azimuths (otherwise, these default to math.NaN()).
 If any of the points does not constitute a valid geographic coordinate, the returned distance will be math.NaN().
 
 The following notations are used in the implementation:
