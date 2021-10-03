@@ -72,7 +72,7 @@ func Benchmark_DistanceNear(b *testing.B) {
 			result1, result2, result3 = VincentyInverse(nearPoints[idx][0], nearPoints[idx][1], -1, false)
 		}
 	})
-	b.Run("Vincenty_withazimuth", func(b *testing.B) {
+	b.Run("Vincenty", func(b *testing.B) {
 		b.ResetTimer()
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -99,7 +99,7 @@ func Benchmark_DistanceFar(b *testing.B) {
 			result1, result2, result3 = VincentyInverse(separatePoints[idx][0], separatePoints[idx][1], -1, false)
 		}
 	})
-	b.Run("Vincenty_withazimuth", func(b *testing.B) {
+	b.Run("Vincenty", func(b *testing.B) {
 		b.ResetTimer()
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
