@@ -36,6 +36,17 @@ type Point [2]float64
 
 Point represents a latitude-longitude pair in decimal degrees
 
+Constants
+
+```go
+const (
+	LatLowerBound = float64(-90)
+	LatUpperBound = float64(90)
+	LonLowerBound = float64(-180)
+	LonUpperBound = float64(180)
+)
+```
+
 #### func (Point) Antipode
 
 ```go

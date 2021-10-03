@@ -22,6 +22,12 @@ func TestVincentyInverse(t *testing.T) {
 	antipodeOriginSE := geodesy.Point{-46.272337, 169.398118}
 	antipodeSE := antipodeOriginSE.Antipode()
 
+	// Antipodes will fail to converge on the exact points
+	// and within a short radius, so induce a non-convergent
+	// point pair
+	antipodeNonconvOrigin := geodesy.Point{42.35831235, -95.31046631}
+	antipodeNonconv := geodesy.Point{antipodeNonconvOrigin.Antipode().Lat() + 0.00000001, antipodeNonconvOrigin.Antipode().Lon() + 0.00000001}
+
 	type args struct {
 		p1               geodesy.Point
 		p2               geodesy.Point
@@ -68,6 +74,18 @@ func TestVincentyInverse(t *testing.T) {
 				calculateAzimuth: false,
 			},
 			expectedDistance: 10.162235455135733,
+			expectedAzimuth1: math.NaN(),
+			expectedAzimuth2: math.NaN(),
+		},
+		{
+			name: "OK/SW_sub_1k_km_less_accurate",
+			args: args{
+				p1:               geodesy.Point{-37.550643, -56.51251},
+				p2:               geodesy.Point{-37.5507, -56.5126},
+				accuracy:         1e-6,
+				calculateAzimuth: false,
+			},
+			expectedDistance: 10.149099956337418,
 			expectedAzimuth1: math.NaN(),
 			expectedAzimuth2: math.NaN(),
 		},
@@ -180,10 +198,46 @@ func TestVincentyInverse(t *testing.T) {
 			expectedAzimuth2: 208.17248801650823,
 		},
 		{
+			name: "FAIL/divergent",
+			args: args{
+				p1:               antipodeNonconvOrigin,
+				p2:               antipodeNonconv,
+				accuracy:         -1,
+				calculateAzimuth: true,
+			},
+			expectedDistance: math.NaN(),
+			expectedAzimuth1: math.NaN(),
+			expectedAzimuth2: math.NaN(),
+		},
+		{
 			name: "FAIL/antipode",
 			args: args{
 				p1:               antipodeOriginNW,
 				p2:               antipodeNW,
+				accuracy:         -1,
+				calculateAzimuth: true,
+			},
+			expectedDistance: math.NaN(),
+			expectedAzimuth1: math.NaN(),
+			expectedAzimuth2: math.NaN(),
+		},
+		{
+			name: "FAIL/invalid_p1",
+			args: args{
+				p1:               geodesy.Point{geodesy.LatUpperBound+1, -57.534954},
+				p2:               geodesy.Point{-34.579340, -57.534954},
+				accuracy:         -1,
+				calculateAzimuth: true,
+			},
+			expectedDistance: math.NaN(),
+			expectedAzimuth1: math.NaN(),
+			expectedAzimuth2: math.NaN(),
+		},
+		{
+			name: "FAIL/invalid_p2",
+			args: args{
+				p1:               geodesy.Point{-34.579340, -57.534954},
+				p2:               geodesy.Point{geodesy.LatUpperBound+1, -57.534954},
 				accuracy:         -1,
 				calculateAzimuth: true,
 			},
@@ -197,17 +251,17 @@ func TestVincentyInverse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			d, az1, az2 := distance.VincentyInverse(tt.args.p1, tt.args.p2, tt.args.accuracy, tt.args.calculateAzimuth)
 			if math.IsNaN(tt.expectedDistance) {
-				assert.True(t, math.IsNaN(d))
+				assert.True(t, math.IsNaN(d), "got %f", d)
 			} else {
 				assert.EqualValues(t, tt.expectedDistance, d)
 			}
 			if math.IsNaN(tt.expectedAzimuth1) {
-				assert.True(t, math.IsNaN(az1))
+				assert.True(t, math.IsNaN(az1), "got %f", az1)
 			} else {
 				assert.EqualValues(t, tt.expectedAzimuth1, az1)
 			}
 			if math.IsNaN(tt.expectedAzimuth2) {
-				assert.True(t, math.IsNaN(az2))
+				assert.True(t, math.IsNaN(az2), "got %f", az2)
 			} else {
 				assert.EqualValues(t, tt.expectedAzimuth2, az2)
 			}
